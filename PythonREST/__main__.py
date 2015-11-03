@@ -6,8 +6,8 @@ def main():
     setup = Setup()
     config = setup.run()
 
-    app = Application()
-    app.run(config)
+    app = Application(config)
+    app.run()
 
     teardown = Teardown()
     teardown.run()
