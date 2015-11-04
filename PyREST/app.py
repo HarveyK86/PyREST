@@ -5,8 +5,8 @@ from welcome import welcome
 class Setup(object):
 
     __filename = "app.properties"
-    __regex = r"^([\w-]*):(.*)$"
-    __keys = ("url-host", "url-route", "url-params")
+    __regex = r"^([^#][\w\.]*)=(.*)$"
+    __keys = ("url.host", "url.route", "url.params", "user.username", "user.password")
 
     def __init__(self):
         #print("Setup : __init__")
@@ -29,11 +29,7 @@ class Setup(object):
 
         for line in lines:
             match = re.search(self.__regex, line)
-
-            if match:
-                config[match.group(1)] = match.group(2)
-            else:
-                print("Setup : __getConfig : no default config")
+            if match: config[match.group(1)] = match.group(2)
 
         print("----- Configuration -----")
 
@@ -56,7 +52,8 @@ class Setup(object):
 
 class Application(object):
 
-    __format = "{url-host}{url-route}?{url-params}"
+    __urlFormat = "{host}{route}?{params}"
+    __authorisationFormat = "{username}:{password}"
 
     def __init__(self, config):
         print("Application : __init__[config=" + str(config) + "]")
@@ -69,15 +66,26 @@ class Application(object):
         welcome()
 
         url = self.__getURL()
+        authorisation = self.__getAuthorisation();
+
         print("Application : run : URL is " + url)
+        print("Application : run : authorisation is " + authorisation)
 
     def __getURL(self):
         #print("Application : __getURL")
 
-        url = self.__format.format(**self.__config)
+        url = self.__urlFormat.format(host = self.__config["url.host"], route = self.__config["url.route"], params = self.__config["url.params"])
 
         print("Application : __getURL[returns=" + url + "]")
         return url
+
+    def __getAuthorisation(self):
+        #print("Application : __getAuthorisation")
+
+        authorisation = self.__authorisationFormat.format(username = self.__config["user.username"], password = self.__config["user.password"])
+
+        print("Application : __getAuthorisation[returns=" + authorisation + "]")
+        return authorisation
 
 class Teardown(object):
 
