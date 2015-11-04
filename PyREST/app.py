@@ -1,4 +1,5 @@
 import re
+import requests
 
 from welcome import welcome
 
@@ -7,6 +8,7 @@ class Setup(object):
     __filename = "app.properties"
     __regex = r"^([^#][\w\.]*)=(.*)$"
     __keys = ("url.host", "url.route", "url.params", "user.username", "user.password")
+    __required = ("url.host")
 
     def __init__(self):
         #print("Setup : __init__")
@@ -42,8 +44,10 @@ class Setup(object):
 
             if value:
                 config[key] = value
-            else:
+            elif key in self.__required:
                 raise RuntimeError("Value for " + key + " required!")
+            else:
+                config[key] = ""
 
         print("-------------------------")
 
@@ -52,8 +56,8 @@ class Setup(object):
 
 class Application(object):
 
-    __urlFormat = "{host}{route}?{params}"
-    __authorisationFormat = "{username}:{password}"
+    __urlFormat1 = "{host}{route}"
+    __urlFormat2 = "{urlFormat1}?{params}"
 
     def __init__(self, config):
         print("Application : __init__[config=" + str(config) + "]")
@@ -66,26 +70,24 @@ class Application(object):
         welcome()
 
         url = self.__getURL()
-        authorisation = self.__getAuthorisation();
 
         print("Application : run : URL is " + url)
-        print("Application : run : authorisation is " + authorisation)
+
+        response = requests.get(url)
+        print(response)
 
     def __getURL(self):
         #print("Application : __getURL")
 
-        url = self.__urlFormat.format(host = self.__config["url.host"], route = self.__config["url.route"], params = self.__config["url.params"])
+        urlFormat1 = self.__urlFormat1.format(host = self.__config["url.host"], route = self.__config["url.route"])
+
+        if self.__config.get("url.params"):
+            url = self.__urlFormat2.format(urlFormat1 = urlFormat1, params = self.__config["url.params"])
+        else:
+            url = urlFormat1
 
         print("Application : __getURL[returns=" + url + "]")
         return url
-
-    def __getAuthorisation(self):
-        #print("Application : __getAuthorisation")
-
-        authorisation = self.__authorisationFormat.format(username = self.__config["user.username"], password = self.__config["user.password"])
-
-        print("Application : __getAuthorisation[returns=" + authorisation + "]")
-        return authorisation
 
 class Teardown(object):
 
