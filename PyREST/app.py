@@ -6,9 +6,9 @@ from welcome import welcome
 class Setup(object):
 
     __filename = "app.properties"
-    __regex = r"^([^#][\w\.]*)=(.*)$"
-    __keys = ("url.host", "url.route", "url.params", "user.username", "user.password")
-    __required = ("url.host")
+    __regex = r"^([^#][\w\.-]*)=(.*)$"
+    __keys = ("request.type", "request.content-list", "url.host", "url.route", "url.params", "user.username", "user.password")
+    __required = ("request.type", "url.host")
 
     def __init__(self):
         #print("Setup : __init__")
@@ -70,11 +70,15 @@ class Application(object):
         welcome()
 
         url = self.__getURL()
+        contentList = self.__getContentList()
 
-        print("Application : run : URL is " + url)
+        if self.__config["request.type"] == "GET":
+            response = self.__httpGet(url)
 
-        response = requests.get(url)
-        print(response)
+        elif self.__config["request.type"] == "POST":
+
+            for content in contentList:
+                response = self.__httpPost(url, content)
 
     def __getURL(self):
         #print("Application : __getURL")
@@ -88,6 +92,39 @@ class Application(object):
 
         print("Application : __getURL[returns=" + url + "]")
         return url
+
+    def __getContentList(self):
+        #print("Application : __getContentList")
+
+        filename = self.__config.get("request.content-list")
+        contentList = []
+
+        if filename:
+            file = open(filename)
+            lines = file.readlines()
+
+            for line in lines:
+                content = line.replace("\n", "")
+                contentList.append(content)
+
+        print("Application : __getContentList[returns=" + str(contentList) + "]")
+        return contentList
+
+    def __httpGet(self, url):
+        print("Application : __httpGet[url=" + url + "]")
+
+        response = requests.get(url)
+
+        print("Application : __httpGet[url=" + url + ", returns=" + str(response) + "]")
+        return response
+
+    def __httpPost(self, url, content):
+        print("Application : __httpPost[url=" + url + ", content=" + content + "]")
+
+        response = requests.post(url)
+
+        print("Application : __httpPost[url=" + url + ", content=" + content + ", returns=" + str(response) + "]")
+        return response
 
 class Teardown(object):
 
