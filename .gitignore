@@ -1,3 +1,4 @@
 ENV
 PyREST/__pycache__
 content-list.txt
+output.log
