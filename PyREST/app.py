@@ -1,3 +1,4 @@
+import logging
 import re
 import requests
 
@@ -10,20 +11,28 @@ class Setup(object):
     __keys = ("request.type", "request.content-list", "url.host", "url.route", "url.params", "user.username", "user.password")
     __required = ("request.type", "url.host")
 
+    __logger = logging.getLogger("PyREST")
+
     def __init__(self):
         #print("Setup : __init__")
-        pass
+
+        fileHandler = logging.FileHandler("output.log")
+        consoleHandler = logging.StreamHandler()
+
+        self.__logger.setLevel(logging.INFO)
+        self.__logger.addHandler(fileHandler)
+        self.__logger.addHandler(consoleHandler)
 
     def run(self):
-        print("Setup : run")
+        self.__logger.info("Setup : run")
 
         config = self.__getConfig()
 
-        print("Setup : run[returns=" + str(config) + "]")
+        self.__logger.info("Setup : run[returns=" + str(config) + "]")
         return config
 
     def __getConfig(self):
-        print("Setup : __getConfig")
+        self.__logger.info("Setup : __getConfig")
 
         file = open(self.__filename)
         lines = file.readlines()
@@ -33,7 +42,7 @@ class Setup(object):
             match = re.search(self.__regex, line)
             if match: config[match.group(1)] = match.group(2)
 
-        print("----- Configuration -----")
+        self.__logger.info("----- Configuration -----")
 
         for key in self.__keys:
             if config.get(key):
@@ -49,9 +58,9 @@ class Setup(object):
             else:
                 config[key] = ""
 
-        print("-------------------------")
+        self.__logger.info("-------------------------")
 
-        print("Setup : __getConfig[returns=" + str(config) + "]")
+        self.__logger.info("Setup : __getConfig[returns=" + str(config) + "]")
         return config
 
 class Application(object):
@@ -59,13 +68,15 @@ class Application(object):
     __urlFormat1 = "{host}{route}"
     __urlFormat2 = "{urlFormat1}?{params}"
 
+    __logger = logging.getLogger("PyREST")
+
     def __init__(self, config):
-        print("Application : __init__[config=" + str(config) + "]")
+        self.__logger.info("Application : __init__[config=" + str(config) + "]")
 
         self.__config = config
 
     def run(self):
-        print("Application : run")
+        self.__logger.info("Application : run")
 
         welcome()
 
@@ -80,10 +91,10 @@ class Application(object):
             for content in contentList:
                 response = self.__httpPost(url, content)
 
-        print("Application : run : response is 200: '" + response.text + "'")
+        self.__logger.info("Application : run : response is 200: '" + response.text + "'")
 
     def __getURL(self):
-        #print("Application : __getURL")
+        #self.__logger.info("Application : __getURL")
 
         urlFormat1 = self.__urlFormat1.format(host = self.__config["url.host"], route = self.__config["url.route"])
 
@@ -92,11 +103,11 @@ class Application(object):
         else:
             url = urlFormat1
 
-        print("Application : __getURL[returns=" + url + "]")
+        self.__logger.info("Application : __getURL[returns=" + url + "]")
         return url
 
     def __getContentList(self):
-        #print("Application : __getContentList")
+        #self.__logger.info("Application : __getContentList")
 
         filename = self.__config.get("request.content-list")
         contentList = []
@@ -109,31 +120,33 @@ class Application(object):
                 content = line.replace("\n", "")
                 contentList.append(content)
 
-        print("Application : __getContentList[returns=" + str(contentList) + "]")
+        self.__logger.info("Application : __getContentList[returns=" + str(contentList) + "]")
         return contentList
 
     def __httpGet(self, url):
-        print("Application : __httpGet[url=" + url + "]")
+        self.__logger.info("Application : __httpGet[url=" + url + "]")
 
         response = requests.get(url)
 
-        print("Application : __httpGet[url=" + url + ", returns=" + str(response) + "]")
+        self.__logger.info("Application : __httpGet[url=" + url + ", returns=" + str(response) + "]")
         return response
 
     def __httpPost(self, url, content):
-        print("Application : __httpPost[url=" + url + ", content=" + content + "]")
+        self.__logger.info("Application : __httpPost[url=" + url + ", content=" + content + "]")
 
         response = requests.post(url, auth=(self.__config["user.username"], self.__config["user.password"]), data=content)
 
-        print("Application : __httpPost[url=" + url + ", content=" + content + ", returns=" + str(response) + "]")
+        self.__logger.info("Application : __httpPost[url=" + url + ", content=" + content + ", returns=" + str(response) + "]")
         return response
 
 class Teardown(object):
 
+    __logger = logging.getLogger("PyREST")
+
     def __init__(self):
-        #print("Teardown : __init__")
+        #self.__logger.info("Teardown : __init__")
         pass
 
     def run(self):
-        #print("Teardown : run")
+        #self.__logger.info("Teardown : run")
         pass
