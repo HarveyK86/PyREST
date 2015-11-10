@@ -16,7 +16,7 @@ To install this project run;
 
 This will;
 * generate `ENV` virtualenv directory
-* install `requirements.txt` pip requirments
+* install `requirements.txt` pip requirements
 
 **Usage**
 
