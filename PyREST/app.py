@@ -80,6 +80,8 @@ class Application(object):
             for content in contentList:
                 response = self.__httpPost(url, content)
 
+        print("Application : run : response is 200: '" + response.text + "'")
+
     def __getURL(self):
         #print("Application : __getURL")
 
@@ -121,7 +123,7 @@ class Application(object):
     def __httpPost(self, url, content):
         print("Application : __httpPost[url=" + url + ", content=" + content + "]")
 
-        response = requests.post(url)
+        response = requests.post(url, auth=(self.__config["user.username"], self.__config["user.password"]), data=content)
 
         print("Application : __httpPost[url=" + url + ", content=" + content + ", returns=" + str(response) + "]")
         return response
