@@ -85,13 +85,13 @@ class Application(object):
 
         if self.__config["request.type"] == "GET":
             response = self.__httpGet(url)
+            self.__logger.info("Application : run : response is 200: '" + response.text + "'")
 
         elif self.__config["request.type"] == "POST":
 
             for content in contentList:
                 response = self.__httpPost(url, content)
-
-        self.__logger.info("Application : run : response is 200: '" + response.text + "'")
+                self.__logger.info("Application : run : response is 200: '" + response.text + "'")
 
     def __getURL(self):
         #self.__logger.info("Application : __getURL")
